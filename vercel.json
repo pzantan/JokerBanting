@@ -1,3 +1,6 @@
 {
-  "outputDirectory": "www"
+  "framework": null,
+  "outputDirectory": "www",
+  "buildCommand": null,
+  "installCommand": null
 }
