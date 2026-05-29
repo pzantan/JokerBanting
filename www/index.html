@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>BantingScore - Pencatat Skor 4 Pemain</title>
+  
+  <!-- SEO & PWA Meta Tags -->
+  <meta name="description" content="Aplikasi pencatat skor pertandingan 4 orang modern, responsif, dan berjalan sepenuhnya offline. Sempurna untuk game kartu, domino, dan papan.">
+  <meta name="theme-color" content="#6750A4">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <link rel="manifest" href="./manifest.json">
+  <link rel="icon" type="image/svg+xml" href="./icons/app-icon.svg">
+  <link rel="apple-touch-icon" href="./icons/app-icon.svg">
+
+  <!-- Core CSS File -->
+  <link rel="stylesheet" href="./css/style.css">
+</head>
+<body>
+
+  <!-- Confetti Canvas for Winners -->
+  <canvas id="confetti-canvas"></canvas>
+
+  <!-- App Shell Container -->
+  <div class="app-container">
+    
+    <!-- App Bar Header -->
+    <header class="app-header">
+      <div class="header-title-group">
+        <svg class="app-logo" viewBox="0 0 512 512">
+          <!-- Small inline representation of app icon to ensure no broken image -->
+          <circle cx="256" cy="256" r="240" fill="#6750A4" />
+          <rect x="150" y="150" width="212" height="212" rx="20" fill="#FFFFFF" />
+          <text x="256" y="275" font-family="sans-serif" font-size="70" font-weight="900" fill="#6750A4" text-anchor="middle">4P</text>
+        </svg>
+        <div class="header-title">
+          BantingScore
+          <span class="header-subtitle">Pencatat Skor 4 Pemain</span>
+        </div>
+      </div>
+      
+      <div class="header-actions">
+        <!-- Dark Mode Toggle -->
+        <button class="btn-icon" id="btn-dark-mode" title="Ubah Tema Gelap" aria-label="Ubah Tema Gelap">
+          <svg id="btn-dark-mode-icon" viewBox="0 0 24 24">
+            <path d="M12 3c-4.97 0-9 4.03-9 9s4.03 9 9 9 9-4.03 9-9c0-.46-.04-.92-.1-1.36-.57.83-1.53 1.36-2.61 1.36-1.77 0-3.2-1.43-3.2-3.2 0-1.08.53-2.04 1.36-2.61A8.86 8.86 0 0 0 12 3z"/>
+          </svg>
+        </button>
+        <!-- Reset/New Game Button -->
+        <button class="btn-icon" id="btn-new-game" title="Game Baru" aria-label="Game Baru">
+          <svg viewBox="0 0 24 24">
+            <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
+          </svg>
+        </button>
+        <!-- Settings Button -->
+        <button class="btn-icon" id="btn-settings" title="Pengaturan" aria-label="Pengaturan">
+          <svg viewBox="0 0 24 24">
+            <path d="M19.43 12.98c.04-.32.07-.64.07-.98s-.03-.66-.07-.98l2.11-1.65c.19-.15.24-.42.12-.64l-2-3.46c-.12-.22-.39-.3-.61-.22l-2.49 1c-.52-.4-1.08-.73-1.69-.98l-.38-2.65C14.46 2.18 14.25 2 14 2h-4c-.25 0-.46.18-.49.42l-.38 2.65c-.61.25-1.17.59-1.69.98l-2.49-1c-.23-.09-.49 0-.61.22l-2 3.46c-.13.22-.07.49.12.64l2.11 1.65c-.04.32-.07.65-.07.98s.03.66.07.98l-2.11 1.65c-.19.15-.24.42-.12.64l2 3.46c.12.22.39.3.61.22l2.49-1c.52.4 1.08.73 1.69.98l.38 2.65c.03.24.24.42.49.42h4c.25 0 .46-.18.49-.42l.38-2.65c.61-.25 1.17-.59 1.69-.98l2.49 1c.23.09.49 0 .61-.22l2-3.46c.12-.22.07-.49-.12-.64l-2.11-1.65zM12 15.5c-1.93 0-3-1.07-3-3s1.07-3 3-3 3 1.07 3 3-1.07 3-3 3z"/>
+          </svg>
+        </button>
+      </div>
+    </header>
+
+    <!-- Active Match Info Bar (Sticky) -->
+    <div class="match-status-bar">
+      <div class="status-item">
+        <span>Ronde:</span>
+        <span class="status-badge" id="bar-round-num">0</span>
+      </div>
+      <div class="status-item">
+        <span id="bar-target-info">Target: 100</span>
+      </div>
+      <div class="status-item">
+        <span id="bar-rule-info">Tinggi Menang</span>
+      </div>
+    </div>
+
+    <!-- ======================================================== -->
+    <!-- VIEW: DASHBOARD (Active Match Players) -->
+    <!-- ======================================================== -->
+    <div class="view-panel active" id="view-dashboard">
+      <!-- Tombol Input Skor Utama di Atas -->
+      <div style="padding: 12px 16px 4px 16px; width: 100%;">
+        <button class="btn-compact btn-compact-primary" id="btn-add-scores" style="width: 100%; height: 38px; justify-content: center; font-size: 12px; gap: 6px;">
+          <svg viewBox="0 0 24 24" style="width:16px; height:16px;"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
+          Input Skor Ronde
+        </button>
+      </div>
+
+      <div class="players-grid">
+        
+        <!-- Player 1 Card -->
+        <div class="player-card" id="player-card-1" data-idx="0">
+          <div class="card-header-row">
+            <div class="rank-badge">#1</div>
+            <div class="player-color-dot" style="background-color: var(--player-1);"></div>
+          </div>
+          <div class="player-name">Pemain 1</div>
+          <div class="player-score">
+            <span class="score-number">0</span>
+            <span class="score-diff-badge" id="score-diff-1">0</span>
+          </div>
+        </div>
+
+        <!-- Player 2 Card -->
+        <div class="player-card" id="player-card-2" data-idx="1">
+          <div class="card-header-row">
+            <div class="rank-badge">#2</div>
+            <div class="player-color-dot" style="background-color: var(--player-2);"></div>
+          </div>
+          <div class="player-name">Pemain 2</div>
+          <div class="player-score">
+            <span class="score-number">0</span>
+            <span class="score-diff-badge" id="score-diff-2">0</span>
+          </div>
+        </div>
+
+        <!-- Player 3 Card -->
+        <div class="player-card" id="player-card-3" data-idx="2">
+          <div class="card-header-row">
+            <div class="rank-badge">#3</div>
+            <div class="player-color-dot" style="background-color: var(--player-3);"></div>
+          </div>
+          <div class="player-name">Pemain 3</div>
+          <div class="player-score">
+            <span class="score-number">0</span>
+            <span class="score-diff-badge" id="score-diff-3">0</span>
+          </div>
+        </div>
+
+        <!-- Player 4 Card -->
+        <div class="player-card" id="player-card-4" data-idx="3">
+          <div class="card-header-row">
+            <div class="rank-badge">#4</div>
+            <div class="player-color-dot" style="background-color: var(--player-4);"></div>
+          </div>
+          <div class="player-name">Pemain 4</div>
+          <div class="player-score">
+            <span class="score-number">0</span>
+            <span class="score-diff-badge" id="score-diff-4">0</span>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Riwayat Ronde Tabel di bawah Skor -->
+      <div class="dashboard-table-header" style="display:flex; justify-content:space-between; align-items:center; padding: 0 16px; margin: 12px 0 6px 0;">
+        <span style="font-size: 14px; font-weight: 700; color: var(--md-primary);">Riwayat Ronde</span>
+        <span style="font-size: 11px; color: var(--md-outline); font-weight:600;">Sentuh ikon edit di kanan untuk mengubah skor</span>
+      </div>
+      
+      <div class="history-table-container" id="history-table-container-div" style="display: none; margin: 0 16px 12px 16px; overflow-y: auto; max-height: 180px; flex-grow: 1;">
+        <table class="history-table">
+          <thead>
+            <tr id="history-table-headers">
+              <!-- Dynamically populated headers -->
+            </tr>
+          </thead>
+          <tbody id="history-table-body">
+            <!-- Dynamically populated rows -->
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Empty Rounds History State inside Dashboard -->
+      <div class="history-empty" id="history-empty-div" style="padding: 16px; margin: 0 16px 12px 16px; flex-grow: 1; min-height: 100px;">
+        <svg viewBox="0 0 24 24" style="width: 32px; height: 32px; fill: var(--md-outline);">
+          <path d="M3 13h2v-2H3v2zm0 4h2v-2H3v2zm0-8h2V7H3v2zm4 4h14v-2H7v2zm0 4h14v-2H7v2zM7 7v2h14V7H7z"/>
+        </svg>
+        <p style="font-size: 13px;">Belum ada skor ronde. Klik 'Input Skor' di atas.</p>
+      </div>
+
+      <!-- Compact Action Buttons Bar -->
+      <div class="compact-action-bar">
+        <button class="btn-compact btn-compact-outline" id="btn-undo-action" title="Batalkan Ronde Terakhir">
+          <svg viewBox="0 0 24 24"><path d="M12.5 8c-2.65 0-5.05.99-6.9 2.6L2 7v9h9l-3.62-3.62c1.39-1.16 3.16-1.88 5.12-1.88 3.54 0 6.55 2.31 7.6 5.5l2.37-.78C21.08 11.03 17.15 8 12.5 8z"/></svg>
+          Undo
+        </button>
+        <button class="btn-compact btn-compact-outline" id="btn-reset-match" title="Ulangi Skor">
+          <svg viewBox="0 0 24 24"><path d="M17.65 6.35A7.958 7.958 0 0 0 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08A5.99 5.99 0 0 1 12 18c-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/></svg>
+          Ulangi
+        </button>
+        <button class="btn-compact btn-compact-success" id="btn-complete-match" title="Selesaikan Game">
+          <svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+          Selesai
+        </button>
+      </div>
+    </div>
+
+    <!-- ======================================================== -->
+    <!-- VIEW: STATS (Graphics and summaries) -->
+    <!-- ======================================================== -->
+    <div class="view-panel" id="view-stats">
+      <!-- Generated Dynamically via app.js -->
+    </div>
+
+    <!-- ======================================================== -->
+    <!-- VIEW: PAST MATCHES (History of old games) -->
+    <!-- ======================================================== -->
+    <div class="view-panel" id="view-past">
+      <h3 style="font-size: 18px; font-weight: 700; margin-bottom: 12px; color: var(--md-primary);">Pertandingan Sebelumnya</h3>
+      
+      <!-- Empty Past Matches State -->
+      <div class="history-empty" id="history-tab-empty">
+        <svg viewBox="0 0 24 24">
+          <path d="M13 3a9 9 0 0 0-9 9H1l3.89 3.89.07.14L9 12H6a7 7 0 0 1 7-7 7 7 0 0 1 7 7 7 7 0 0 1-7 7c-1.93 0-3.68-.79-4.94-2.06l-1.42 1.42A8.9 8.9 0 0 0 13 21a9 9 0 0 0 9-9 9 9 0 0 0-9-9zm-1 5v5l4.28 2.54.72-1.21-3.5-2.08V8h-1.5z"/>
+        </svg>
+        <p>Belum ada riwayat pertandingan selesai.</p>
+      </div>
+
+      <!-- Past Matches List -->
+      <div style="display: flex; flex-direction: column;" id="completed-matches-list">
+        <!-- Dynamically populated -->
+      </div>
+    </div>
+
+    <!-- ======================================================== -->
+    <!-- BOTTOM TAB NAVIGATION BAR -->
+    <!-- ======================================================== -->
+    <nav class="bottom-navigation">
+      <button class="nav-item active" data-view="dashboard">
+        <div class="nav-icon-container">
+          <svg viewBox="0 0 24 24">
+            <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-8.2 10.74l-2.62-3.1L5 14.5h14l-4.52-6.02-3.68 4.76z"/>
+          </svg>
+        </div>
+        <span>Skor</span>
+      </button>
+
+      
+      <button class="nav-item" data-view="stats">
+        <div class="nav-icon-container">
+          <svg viewBox="0 0 24 24">
+            <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 14H7v-5h5v5zm6 0h-5V7h5v10z"/>
+          </svg>
+        </div>
+        <span>Grafik</span>
+      </button>
+      
+      <button class="nav-item" data-view="past">
+        <div class="nav-icon-container">
+          <svg viewBox="0 0 24 24">
+            <path d="M13 3a9 9 0 0 0-9 9H1l3.89 3.89.07.14L9 12H6a7 7 0 0 1 7-7 7 7 0 0 1 7 7 7 7 0 0 1-7 7c-1.93 0-3.68-.79-4.94-2.06l-1.42 1.42A8.9 8.9 0 0 0 13 21a9 9 0 0 0 9-9 9 9 0 0 0-9-9zm-1 5v5l4.28 2.54.72-1.21-3.5-2.08V8h-1.5z"/>
+          </svg>
+        </div>
+        <span>Riwayat</span>
+      </button>
+    </nav>
+
+    <!-- ======================================================== -->
+    <!-- DIALOG: CONFIG NEW GAME -->
+    <!-- ======================================================== -->
+    <div class="modal-overlay" id="modal-new-game">
+      <div class="bottom-sheet">
+        <div class="sheet-handle"></div>
+        <div class="sheet-header">
+          <h3 class="sheet-title">Pertandingan Baru</h3>
+        </div>
+        
+        <!-- Input Names -->
+        <div class="form-group">
+          <label class="form-label">Nama Pemain</label>
+          <div style="display: flex; flex-direction: column; gap: 8px;">
+            <input type="text" class="form-control" id="p1-name-input" placeholder="Pemain 1" maxlength="12">
+            <input type="text" class="form-control" id="p2-name-input" placeholder="Pemain 2" maxlength="12">
+            <input type="text" class="form-control" id="p3-name-input" placeholder="Pemain 3" maxlength="12">
+            <input type="text" class="form-control" id="p4-name-input" placeholder="Pemain 4" maxlength="12">
+          </div>
+        </div>
+
+        <!-- Win Conditions -->
+        <div class="form-group">
+          <label class="form-label">Metode Kemenangan</label>
+          <select class="form-control" id="game-wincondition">
+            <option value="highest">Skor Tertinggi Menang</option>
+            <option value="lowest">Skor Terendah Menang (Kartu Remi/Gaple)</option>
+          </select>
+        </div>
+
+        <!-- Target Score -->
+        <div class="form-group">
+          <label class="form-label">Batas Skor Target (Finish)</label>
+          <select class="form-control" id="game-target">
+            <option value="">Tanpa Batas</option>
+            <option value="1000">1000 Poin</option>
+            <option value="1500">1500 Poin</option>
+            <option value="2000">2000 Poin</option>
+          </select>
+        </div>
+
+        <button class="btn-action btn-action-primary mt-12" id="btn-start-game" style="min-height: 56px; font-size: 16px; padding: 0 16px;">
+          Mulai Pertandingan
+        </button>
+      </div>
+    </div>
+
+    <!-- ======================================================== -->
+    <!-- DIALOG: SETTINGS -->
+    <!-- ======================================================== -->
+    <div class="modal-overlay" id="modal-settings">
+      <div class="bottom-sheet">
+        <div class="sheet-handle"></div>
+        <div class="sheet-header">
+          <h3 class="sheet-title">Pengaturan Aplikasi</h3>
+        </div>
+
+        <!-- App Colors -->
+        <div class="form-group">
+          <label class="form-label">Warna Aksen Tema</label>
+          <div style="display: flex; gap: 16px; margin-top: 4px;">
+            <button class="btn-icon theme-dot" data-theme="violet" style="background-color:#6750A4; border-radius: 50%; width: 44px; height: 44px;" title="Ungu"></button>
+            <button class="btn-icon theme-dot" data-theme="teal" style="background-color:#006A6A; border-radius: 50%; width: 44px; height: 44px;" title="Teal"></button>
+            <button class="btn-icon theme-dot" data-theme="rose" style="background-color:#BA1A1A; border-radius: 50%; width: 44px; height: 44px;" title="Rose"></button>
+          </div>
+        </div>
+
+        <!-- Switches -->
+        <div class="form-group mt-12" style="gap: 16px;">
+          <!-- Dark Mode -->
+          <label class="checkbox-label">
+            <input type="checkbox" id="setting-darkmode">
+            <span class="checkbox-custom">
+              <svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+            </span>
+            Mode Gelap (Dark Theme)
+          </label>
+
+          <!-- Sounds -->
+          <label class="checkbox-label">
+            <input type="checkbox" id="setting-sound" checked>
+            <span class="checkbox-custom">
+              <svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+            </span>
+            Efek Suara Sintetis
+          </label>
+
+          <!-- Vibration -->
+          <label class="checkbox-label">
+            <input type="checkbox" id="setting-vibrate" checked>
+            <span class="checkbox-custom">
+              <svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+            </span>
+            Getaran Haptik
+          </label>
+        </div>
+
+        <!-- Edit Active Rules -->
+        <div class="form-group">
+          <label class="form-label">Metode Kemenangan Aktif</label>
+          <select class="form-control" id="setting-wincondition">
+            <option value="highest">Skor Tertinggi Menang</option>
+            <option value="lowest">Skor Terendah Menang</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Target Skor Aktif</label>
+          <select class="form-control" id="setting-target">
+            <option value="">Tanpa Batas</option>
+            <option value="1000">1000 Poin</option>
+            <option value="1500">1500 Poin</option>
+            <option value="2000">2000 Poin</option>
+          </select>
+        </div>
+
+        <button class="btn-action btn-action-primary mt-12" id="btn-save-settings">
+          Simpan Setelan
+        </button>
+      </div>
+    </div>
+
+    <!-- ======================================================== -->
+    <!-- DIALOG: ROUND SCORE KEYPAD INPUT (BOTTOM SHEET) -->
+    <!-- ======================================================== -->
+    <div class="modal-overlay" id="modal-round-input">
+      <div class="bottom-sheet" style="max-height: 95vh; gap: 12px;">
+        <div class="sheet-handle"></div>
+        <div class="sheet-header" style="margin-bottom: 4px;">
+          <h3 class="sheet-title">Input Skor Ronde</h3>
+        </div>
+
+        <!-- 4 Players Score display grid -->
+        <div class="round-input-grid">
+          <!-- P1 -->
+          <div class="player-input-column active" id="keypad-player-col-1" data-idx="0">
+            <div class="input-player-dot"></div>
+            <span class="input-player-name">P1</span>
+            <div class="score-display-box">0</div>
+          </div>
+          <!-- P2 -->
+          <div class="player-input-column" id="keypad-player-col-2" data-idx="1">
+            <div class="input-player-dot"></div>
+            <span class="input-player-name">P2</span>
+            <div class="score-display-box">0</div>
+          </div>
+          <!-- P3 -->
+          <div class="player-input-column" id="keypad-player-col-3" data-idx="2">
+            <div class="input-player-dot"></div>
+            <span class="input-player-name">P3</span>
+            <div class="score-display-box">0</div>
+          </div>
+          <!-- P4 -->
+          <div class="player-input-column" id="keypad-player-col-4" data-idx="3">
+            <div class="input-player-dot"></div>
+            <span class="input-player-name">P4</span>
+            <div class="score-display-box">0</div>
+          </div>
+        </div>
+
+        <!-- Virtual Keypad (4x3 / 4x4 Grid) -->
+        <div class="keypad-container">
+          <button class="btn-key" data-key="1">1</button>
+          <button class="btn-key" data-key="2">2</button>
+          <button class="btn-key" data-key="3">3</button>
+          
+          <button class="btn-key" data-key="4">4</button>
+          <button class="btn-key" data-key="5">5</button>
+          <button class="btn-key" data-key="6">6</button>
+          
+          <button class="btn-key" data-key="7">7</button>
+          <button class="btn-key" data-key="8">8</button>
+          <button class="btn-key" data-key="9">9</button>
+          
+          <!-- Special keypad row: Minus toggle, Zero, Clear/Delete -->
+          <button class="btn-key accent" data-key="-">+/-</button>
+          <button class="btn-key" data-key="0">0</button>
+          <button class="btn-key danger" data-key="backspace" aria-label="Hapus">
+            <svg viewBox="0 0 24 24" style="width:20px;height:20px;">
+              <path d="M22 3H7c-.69 0-1.23.35-1.59.88L0 12l5.41 8.11c.36.53.9.89 1.59.89h15c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-3 12.59L17.59 17 14 13.41 10.41 17 9 15.59 12.59 12 9 8.41 10.41 7 14 10.59 17.59 7 19 8.41 15.41 12 19 15.59z"/>
+            </svg>
+          </button>
+        </div>
+
+        <!-- Navigation inside Keypad Dialog & Save -->
+        <div style="display: flex; gap: 8px; width: 100%; margin-top: 4px;">
+          <button class="btn-key accent" data-key="C" style="flex: 1; height: 48px; font-size: 15px;">Clear All</button>
+          <button class="btn-key accent" data-key="next" style="flex: 1.2; height: 48px; font-size: 15px;">Pemain Lanjut</button>
+          <button class="btn-action btn-action-primary" id="btn-save-round" style="flex: 1.5; height: 48px; font-size: 14px; border-radius: var(--radius-md);">
+            Simpan Ronde
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ======================================================== -->
+    <!-- DIALOG: EDIT SPECIFIC ROUND SCORE -->
+    <!-- ======================================================== -->
+    <div class="modal-overlay" id="modal-edit-round">
+      <div class="bottom-sheet">
+        <div class="sheet-handle"></div>
+        <div class="sheet-header">
+          <h3 class="sheet-title">Edit Skor Ronde</h3>
+        </div>
+
+        <div style="display: flex; flex-direction: column; gap: 10px;">
+          <!-- Inputs with +/- toggle buttons -->
+          <div class="edit-score-row">
+            <label class="form-label" id="edit-p1-label">Pemain 1</label>
+            <div class="edit-score-input-group">
+              <button class="btn-toggle-sign" data-target="edit-p1-score" type="button">+/-</button>
+              <input type="text" inputmode="numeric" class="form-control" id="edit-p1-score" placeholder="0">
+            </div>
+          </div>
+          <div class="edit-score-row">
+            <label class="form-label" id="edit-p2-label">Pemain 2</label>
+            <div class="edit-score-input-group">
+              <button class="btn-toggle-sign" data-target="edit-p2-score" type="button">+/-</button>
+              <input type="text" inputmode="numeric" class="form-control" id="edit-p2-score" placeholder="0">
+            </div>
+          </div>
+          <div class="edit-score-row">
+            <label class="form-label" id="edit-p3-label">Pemain 3</label>
+            <div class="edit-score-input-group">
+              <button class="btn-toggle-sign" data-target="edit-p3-score" type="button">+/-</button>
+              <input type="text" inputmode="numeric" class="form-control" id="edit-p3-score" placeholder="0">
+            </div>
+          </div>
+          <div class="edit-score-row">
+            <label class="form-label" id="edit-p4-label">Pemain 4</label>
+            <div class="edit-score-input-group">
+              <button class="btn-toggle-sign" data-target="edit-p4-score" type="button">+/-</button>
+              <input type="text" inputmode="numeric" class="form-control" id="edit-p4-score" placeholder="0">
+            </div>
+          </div>
+        </div>
+
+        <div style="display: flex; gap: 12px; margin-top: 12px;">
+          <button class="btn-action btn-action-outline" id="btn-delete-round" style="border-color: var(--md-error); color: var(--md-error);">
+            Hapus Ronde
+          </button>
+          <button class="btn-action btn-action-primary" id="btn-save-edit-round">
+            Simpan
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ======================================================== -->
+    <!-- DIALOG: MATCH WINNER CELEBRATION -->
+    <!-- ======================================================== -->
+    <div class="modal-overlay" id="modal-winner">
+      <div class="bottom-sheet" style="align-self: center; border-radius: var(--radius-xl); max-width: 400px; transform: scale(0.9); opacity: 0; transition: transform 0.3s, opacity 0.3s;">
+        <!-- Overrides style slightly to center winner sheet -->
+        <script>
+          // Script triggers class toggle but browser is handle via app.js
+        </script>
+        
+        <div class="winner-banner">
+          <div class="winner-crown">👑</div>
+          <div style="font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 2px;">Juara Pertandingan!</div>
+          <div class="winner-name" id="winner-crown-name">Pemain X</div>
+          <div class="winner-score" id="winner-crown-score">Skor Akhir: 150 (6 Ronde)</div>
+        </div>
+
+        <div style="display: flex; flex-direction: column; gap: 12px; margin-top: 12px;">
+          <button class="btn-action btn-action-outline" id="btn-share-result" style="width: 100%;">
+            <svg viewBox="0 0 24 24">
+              <path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.92 2.92 2.92 1.61 0 2.92-1.31 2.92-2.92s-1.31-2.92-2.92-2.92z"/>
+            </svg>
+            Bagikan Klasemen
+          </button>
+          
+          <button class="btn-action btn-action-primary" id="btn-winner-new-game" style="width: 100%;">
+            Pertandingan Baru
+          </button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Core JavaScript File -->
+  <script src="./js/app.js"></script>
+</body>
+</html>

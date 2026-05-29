@@ -1,0 +1,16 @@
+{
+  "name": "bantingscore",
+  "version": "1.0.0",
+  "description": "BantingScore - Pencatat Skor 4 Pemain PWA",
+  "main": "index.html",
+  "scripts": {
+    "dev": "npx -y http-server www -p 8080"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "^8.3.4",
+    "@capacitor/core": "^8.3.4"
+  },
+  "dependencies": {
+    "@capacitor/android": "^8.3.4"
+  }
+}

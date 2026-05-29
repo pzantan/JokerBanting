@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="100%" height="100%">
+  <defs>
+    <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#6750A4;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#381E72;stop-opacity:1" />
+    </linearGradient>
+    <filter id="shadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="8" stdDeviation="6" flood-color="#000" flood-opacity="0.3" />
+    </filter>
+  </defs>
+  <!-- Background Circle -->
+  <circle cx="256" cy="256" r="240" fill="url(#grad)" />
+  <!-- Clipboard/Scoreboard Base -->
+  <rect x="140" y="120" width="232" height="280" rx="24" fill="#FFFFFF" filter="url(#shadow)" />
+  <!-- Scoreboard Header -->
+  <path d="M140 144 C140 130.7 150.7 120 164 120 H348 C361.3 120 372 130.7 372 144 V190 H140 V144 Z" fill="#E8DEF8" />
+  <!-- Clip -->
+  <rect x="216" y="90" width="80" height="40" rx="10" fill="#EADDFF" filter="url(#shadow)" />
+  <rect x="236" y="102" width="40" height="8" rx="4" fill="#21005D" />
+  <!-- Score Indicators/Lines -->
+  <!-- Player 1 & 2 Row -->
+  <rect x="170" y="215" width="80" height="50" rx="8" fill="#F3EDF7" />
+  <text x="210" y="248" font-family="system-ui, -apple-system, sans-serif" font-size="28" font-weight="bold" fill="#6750A4" text-anchor="middle">99</text>
+  <rect x="262" y="215" width="80" height="50" rx="8" fill="#F3EDF7" />
+  <text x="302" y="248" font-family="system-ui, -apple-system, sans-serif" font-size="28" font-weight="bold" fill="#65558F" text-anchor="middle">87</text>
+  <!-- Player 3 & 4 Row -->
+  <rect x="170" y="285" width="80" height="50" rx="8" fill="#F3EDF7" />
+  <text x="210" y="318" font-family="system-ui, -apple-system, sans-serif" font-size="28" font-weight="bold" fill="#C43C3C" text-anchor="middle">-12</text>
+  <rect x="262" y="285" width="80" height="50" rx="8" fill="#F3EDF7" />
+  <text x="302" y="318" font-family="system-ui, -apple-system, sans-serif" font-size="28" font-weight="bold" fill="#3B7A57" text-anchor="middle">105</text>
+  <!-- Tiny decorative elements -->
+  <circle cx="160" cy="155" r="8" fill="#6750A4" />
+  <circle cx="352" cy="155" r="8" fill="#6750A4" />
+  <rect x="190" y="150" width="132" height="10" rx="5" fill="#21005D" />
+  <!-- Underline check -->
+  <path d="M190 365 L235 365" stroke="#E0E0E0" stroke-width="4" stroke-linecap="round"/>
+  <path d="M277 365 L322 365" stroke="#E0E0E0" stroke-width="4" stroke-linecap="round"/>
+  <circle cx="256" cy="365" r="6" fill="#6750A4" />
+</svg>
