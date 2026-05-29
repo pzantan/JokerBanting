@@ -4,7 +4,8 @@
   "description": "BantingScore - Pencatat Skor 4 Pemain PWA",
   "main": "index.html",
   "scripts": {
-    "dev": "npx -y http-server www -p 8080"
+    "dev": "npx -y http-server www -p 8080",
+    "build": "echo \"No build required\""
   },
   "devDependencies": {
     "@capacitor/cli": "^8.3.4",
