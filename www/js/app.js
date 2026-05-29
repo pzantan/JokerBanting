@@ -1216,8 +1216,8 @@ function renderHistoryTab() {
   gameState.players.forEach(p => {
     headersRow.innerHTML += `<th style="color:${p.color}">${p.name}</th>`;
   });
-  headersRow.innerHTML += '<th title="Pengambil Joker">&#127137;</th>';
   headersRow.innerHTML += '<th>Aksi</th>';
+  headersRow.innerHTML += '<th title="Pengambil Joker">&#127137;</th>';
   
   // Render rows
   tableBody.innerHTML = '';
@@ -1244,12 +1244,6 @@ function renderHistoryTab() {
       `;
     }
 
-    // Joker column — show player name who picked joker this round
-    const jokerName = (round.jokerIdx !== undefined)
-      ? gameState.players[round.jokerIdx].name
-      : '-';
-    tds += `<td style="font-size:11px; color:var(--md-outline); font-weight:600;">&#127137;<br>${jokerName}</td>`;
-    
     // Add Edit/Delete button
     tds += `
       <td class="history-item-actions">
@@ -1258,6 +1252,12 @@ function renderHistoryTab() {
         </button>
       </td>
     `;
+
+    // Joker column — show player name who picked joker this round
+    const jokerName = (round.jokerIdx !== undefined)
+      ? gameState.players[round.jokerIdx].name
+      : '-';
+    tds += `<td style="font-size:11px; color:var(--md-outline); font-weight:600;">&#127137;<br>${jokerName}</td>`;
     
     row.innerHTML = tds;
     tableBody.appendChild(row);

@@ -600,7 +600,8 @@ body {
 .history-table-container {
   background-color: var(--md-surface-container-low);
   border-radius: var(--radius-lg);
-  overflow: hidden;
+  overflow-x: auto;
+  overflow-y: hidden;
   box-shadow: var(--shadow-1);
   margin-bottom: 20px;
 }
@@ -618,6 +619,7 @@ body {
   font-size: 13px;
   padding: 12px 6px;
   border-bottom: 1px solid var(--md-outline-variant);
+  white-space: nowrap;
 }
 
 .history-table td {
@@ -625,6 +627,7 @@ body {
   font-size: 14px;
   font-weight: 500;
   border-bottom: 1px solid var(--md-surface-container-high);
+  white-space: nowrap;
 }
 
 .history-table tr:last-child td {
